@@ -1,14 +1,20 @@
 package com.example.krishnateja.sunshine;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,8 +28,17 @@ import java.util.ArrayList;
  * A placeholder fragment containing a simple view.
  */
 public class ForecastFragment extends Fragment {
+    private final static String TAG="ForecastFragment";
+    private ArrayAdapter<String> arrayAdapterForecast;
+    private ListView listViewForecast;
 
     public ForecastFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -34,17 +49,48 @@ public class ForecastFragment extends Fragment {
         for (int i=0;i<10;i++){
             arraylistForecast.add("Today-sunny-88/63");
         }
-        ArrayAdapter<String> arrayAdapterForecast=new ArrayAdapter<String>(getActivity(),
+        arrayAdapterForecast=new ArrayAdapter<String>(getActivity(),
                 R.layout.list_item_forecast,R.id.list_item_forecast_textview,arraylistForecast);
-        ListView listViewForecast=(ListView) rootView.findViewById(R.id.listview_forecast);
+        listViewForecast=(ListView) rootView.findViewById(R.id.listview_forecast);
         listViewForecast.setAdapter(arrayAdapterForecast);
 
         return rootView;
     }
-    public class FetchWeatherTask extends AsyncTask<Void,Void,Void>{
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.forecastfragment,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id=item.getItemId();
+        if(id==R.id.action_refresh){
+            String url=buildUrl();
+            new FetchWeatherTask().execute(url);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    public String buildUrl(){
+        Uri.Builder builder=new Uri.Builder();
+        builder.scheme("http")
+                .authority("api.openweathermap.org")
+                .appendPath("data")
+                .appendPath("2.5")
+                .appendPath("forecast")
+                .appendPath("daily")
+                .appendQueryParameter("q","94043")
+                .appendQueryParameter("mode","json")
+                .appendQueryParameter("units","metric")
+                .appendQueryParameter("cnt","7");
+        String url=builder.build().toString();
+        Log.v(TAG,"url->"+url);
+        return url;
+    }
+    public class FetchWeatherTask extends AsyncTask<String,Void,String[]>{
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected String[] doInBackground(String... params) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -57,7 +103,7 @@ public class ForecastFragment extends Fragment {
                 // Construct the URL for the OpenWeatherMap query
                 // Possible parameters are avaiable at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
-                URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7");
+                URL url = new URL(params[0]);
 
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -86,10 +132,15 @@ public class ForecastFragment extends Fragment {
                     return null;
                 }
                 forecastJsonStr = buffer.toString();
+                Log.v(TAG,"forecastJsonStr "+forecastJsonStr);
+                return new WeatherDataParser().getWeatherDataFromJson(forecastJsonStr,7);
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
                 // to parse it.
+                return null;
+            } catch (JSONException e) {
+                e.printStackTrace();
                 return null;
             } finally {
                 if (urlConnection != null) {
@@ -103,7 +154,19 @@ public class ForecastFragment extends Fragment {
                     }
                 }
             }
-            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(String[] strings) {
+            super.onPostExecute(strings);
+            Log.d(TAG,"onPostExecute->"+strings.toString());
+            arrayAdapterForecast.clear();
+            for(String s:strings){
+                arrayAdapterForecast.add(s);
+            }
+
+
         }
     }
 }
