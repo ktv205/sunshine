@@ -1,8 +1,12 @@
 package com.example.krishnateja.sunshine;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,10 +15,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,18 +50,35 @@ public class ForecastFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        ArrayList<String> arraylistForecast=new ArrayList<String>();
-        for (int i=0;i<10;i++){
-            arraylistForecast.add("Today-sunny-88/63");
-        }
+//        final ArrayList<String> arraylistForecast=new ArrayList<String>();
+//        for (int i=0;i<10;i++){
+//            arraylistForecast.add("Today-sunny-88/63");
+//        }
         arrayAdapterForecast=new ArrayAdapter<String>(getActivity(),
-                R.layout.list_item_forecast,R.id.list_item_forecast_textview,arraylistForecast);
+                R.layout.list_item_forecast,R.id.list_item_forecast_textview);
         listViewForecast=(ListView) rootView.findViewById(R.id.listview_forecast);
         listViewForecast.setAdapter(arrayAdapterForecast);
+        listViewForecast.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TextView forecastTextView=(TextView)view.findViewById(R.id.list_item_forecast_textview);
+                String forecast=forecastTextView.getText().toString();
 
+                //Toast.makeText(getActivity(),"list item clicked",Toast.LENGTH_SHORT).show();
+                Intent intent=new Intent(getActivity(),
+                        DetailActivity.class).putExtra(Intent.EXTRA_TEXT,forecast);
+                getActivity().startActivity(intent);
+            }
+        });
         return rootView;
     }
 
@@ -66,12 +91,19 @@ public class ForecastFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id=item.getItemId();
         if(id==R.id.action_refresh){
-            String url=buildUrl();
-            new FetchWeatherTask().execute(url);
+           updateWeather();
         }
         return super.onOptionsItemSelected(item);
     }
-    public String buildUrl(){
+    public void updateWeather(){
+        SharedPreferences pref= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String zip=pref.getString(getString(R.string.key_editpref), getString(R.string.default_value_editpref));
+        Log.d(TAG,"zip->"+zip);
+        Log.d(TAG,"default->"+getString(R.string.default_value_editpref));
+        String url=buildUrl(zip);
+        new FetchWeatherTask().execute(url);
+    }
+    public String buildUrl(String zip){
         Uri.Builder builder=new Uri.Builder();
         builder.scheme("http")
                 .authority("api.openweathermap.org")
@@ -79,7 +111,7 @@ public class ForecastFragment extends Fragment {
                 .appendPath("2.5")
                 .appendPath("forecast")
                 .appendPath("daily")
-                .appendQueryParameter("q","94043")
+                .appendQueryParameter("q",zip)
                 .appendQueryParameter("mode","json")
                 .appendQueryParameter("units","metric")
                 .appendQueryParameter("cnt","7");
@@ -133,7 +165,7 @@ public class ForecastFragment extends Fragment {
                 }
                 forecastJsonStr = buffer.toString();
                 Log.v(TAG,"forecastJsonStr "+forecastJsonStr);
-                return new WeatherDataParser().getWeatherDataFromJson(forecastJsonStr,7);
+                return new WeatherDataParser(getActivity()).getWeatherDataFromJson(forecastJsonStr,7);
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
@@ -160,7 +192,7 @@ public class ForecastFragment extends Fragment {
         @Override
         protected void onPostExecute(String[] strings) {
             super.onPostExecute(strings);
-            Log.d(TAG,"onPostExecute->"+strings.toString());
+            Log.d(TAG, "onPostExecute->" + strings.toString());
             arrayAdapterForecast.clear();
             for(String s:strings){
                 arrayAdapterForecast.add(s);

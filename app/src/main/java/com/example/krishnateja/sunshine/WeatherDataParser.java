@@ -1,5 +1,8 @@
 package com.example.krishnateja.sunshine;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.util.Log;
 
@@ -13,7 +16,12 @@ import java.text.SimpleDateFormat;
  * Created by krishnateja on 3/3/2015.
  */
 public class WeatherDataParser  {
+    Context context;
     private final static String TAG="WeatherDataParser";
+    public WeatherDataParser(Context context){
+        this.context=context;
+
+    }
 
     /* The date/time conversion code is going to be moved outside the asynctask later,
          * so for convenience we're breaking it out into its own method now.
@@ -29,6 +37,12 @@ public class WeatherDataParser  {
      * Prepare the weather high/lows for presentation.
      */
     public  String formatHighLows(double high, double low) {
+        SharedPreferences pref= PreferenceManager.getDefaultSharedPreferences(context);
+        if(pref.getString(context.getString(R.string.key_units),"C").equals("F")){
+            Log.d(TAG,"f");
+            high=9*(high/5)+32;
+            low=9*(low/5)+32;
+        }
         // For presentation, assume the user doesn't care about tenths of a degree.
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);

@@ -1,5 +1,9 @@
 package com.example.krishnateja.sunshine;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -13,6 +17,7 @@ import android.view.ViewGroup;
 import android.os.Build;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,8 +57,26 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if(id==R.id.action_settings){
+            Intent intent=new Intent(this,SettingsActivity.class);
+            startActivity(intent);
             return true;
+        }else if(id==R.id.action_map){
+            SharedPreferences pref= PreferenceManager.getDefaultSharedPreferences(this);
+            String location=pref.getString(getString(R.string.key_editpref),"11416");
+            Uri geoLocation=Uri.parse("geo:0,0?").buildUpon()
+                            .appendQueryParameter("q",location)
+                    .build();
+            Intent intent=new Intent(Intent.ACTION_VIEW);
+            intent.setData(geoLocation);
+            if(intent.resolveActivity(getPackageManager())!=null){
+                startActivity(intent);
+            }else{
+                Toast.makeText(this,"no maps app",Toast.LENGTH_SHORT).show();
+            }
+            startActivity(intent);
+
+
         }
 
         return super.onOptionsItemSelected(item);
