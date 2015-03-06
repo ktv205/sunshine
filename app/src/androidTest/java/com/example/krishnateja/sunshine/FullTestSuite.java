@@ -1,5 +1,3 @@
-package com.example.krishnateja.sunshine;
-
 /*
  * Copyright (C) 2014 The Android Open Source Project
  *
@@ -15,11 +13,12 @@ package com.example.krishnateja.sunshine;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.example.krishnateja.sunshine;
 
-        import android.test.suitebuilder.TestSuiteBuilder;
+import android.test.suitebuilder.TestSuiteBuilder;
 
-        import junit.framework.Test;
-        import junit.framework.TestSuite;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class FullTestSuite extends TestSuite {
     public static Test suite() {

@@ -31,7 +31,7 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
                 WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " TEXT UNIQUE NOT NULL, " +
                 WeatherContract.LocationEntry.COLUMN_CITY_NAME + " TEXT NOT NULL, " +
                 WeatherContract.LocationEntry.COLUMN_COORD_LAT + " REAL NOT NULL, " +
-                WeatherContract.LocationEntry.COLUMN_COORD_LNG + " REAL NOT NULL " +
+                WeatherContract.LocationEntry.COLUMN_COORD_LONG + " REAL NOT NULL " +
                 ");";
 
          //4a - Create a Database for SQLiteOpenHelper
