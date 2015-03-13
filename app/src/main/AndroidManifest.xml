@@ -31,6 +31,12 @@
         <activity android:name=".SettingsActivity"
             android:label="settings"
             android:parentActivityName=".MainActivity"></activity>
+        <provider
+            android:authorities="@string/content_authority"
+            android:name=".data.WeatherProvider"
+            android:exported="false"
+            android:syncable="true" />
+
     </application>
 
 </manifest>

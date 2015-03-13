@@ -19,11 +19,6 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        /**
-         * TODO YOUR CODE BELOW HERE FOR QUIZ
-         * QUIZ - 4a - LocationEntry
-         * https://www.udacity.com/course/viewer#!/c-ud853/l-1639338560/e-1633698599/m-1633698600
-         **/
 
         final String SQL_CREATE_LOCATION_TABLE = "CREATE TABLE " + WeatherContract.LocationEntry.TABLE_NAME
                 + " (" +
@@ -34,18 +29,11 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
                 WeatherContract.LocationEntry.COLUMN_COORD_LONG + " REAL NOT NULL " +
                 ");";
 
-         //4a - Create a Database for SQLiteOpenHelper
-         //https://www.udacity.com/course/viewer#!/c-ud853/l-1639338560/m-1633698598
         final String SQL_CREATE_WEATHER_TABLE = "CREATE TABLE " + WeatherContract.WeatherEntry.TABLE_NAME + " (" +
-                // Why AutoIncrement here, and not above?
-                // Unique keys will be auto-generated in either case.  But for weather
-                // forecasting, it's reasonable to assume the user will want information
-                // for a certain date and all dates *following*, so the forecast data
-                // should be sorted accordingly.
+
                 WeatherContract.WeatherEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                // the ID of the location entry associated with this weather data
                 WeatherContract.WeatherEntry.COLUMN_LOC_KEY + " INTEGER NOT NULL, " +
-                WeatherContract.WeatherEntry.COLUMN_DATETEXT + " TEXT NOT NULL, " +
+                WeatherContract.WeatherEntry.COLUMN_DATE + " TEXT NOT NULL, " +
                 WeatherContract.WeatherEntry.COLUMN_SHORT_DESC + " TEXT NOT NULL, " +
                 WeatherContract.WeatherEntry.COLUMN_WEATHER_ID + " INTEGER NOT NULL," +
                 WeatherContract.WeatherEntry.COLUMN_MIN_TEMP + " REAL NOT NULL, " +
@@ -54,12 +42,9 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
                 WeatherContract.WeatherEntry.COLUMN_PRESSURE + " REAL NOT NULL, " +
                 WeatherContract.WeatherEntry.COLUMN_WIND_SPEED + " REAL NOT NULL, " +
                 WeatherContract.WeatherEntry.COLUMN_DEGREES + " REAL NOT NULL, " +
-                // Set up the location column as a foreign key to location table.
                 " FOREIGN KEY (" + WeatherContract.WeatherEntry.COLUMN_LOC_KEY + ") REFERENCES " +
                 WeatherContract.LocationEntry.TABLE_NAME + " (" + WeatherContract.LocationEntry._ID + "), " +
-                // To assure the application have just one weather entry per day
-                // per location, it's created a UNIQUE constraint with REPLACE strategy
-                " UNIQUE (" + WeatherContract.WeatherEntry.COLUMN_DATETEXT + ", " +
+                " UNIQUE (" + WeatherContract.WeatherEntry.COLUMN_DATE + ", " +
                 WeatherContract.WeatherEntry.COLUMN_LOC_KEY + ") ON CONFLICT REPLACE);";
         sqLiteDatabase.execSQL(SQL_CREATE_LOCATION_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_WEATHER_TABLE);
@@ -68,15 +53,6 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase , int oldVersion, int newVersion) {
-        //TODO Uncomment for
-        //4a - SQLiteOpenHelper onUpgrade() method
-        https://www.udacity.com/course/viewer#!/c-ud853/l-1639338560/m-1633698602
-        // This database is only a cache for online data, so its upgrade policy is
-        // to simply to discard the data and start over
-        // Note that this only fires if you change the version number for your database.
-        // It does NOT depend on the version number for your application.
-        // If you want to update the schema without wiping data, commenting out the next 2 lines
-        // should be your top priority before modifying this method.
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WeatherContract.LocationEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WeatherContract.WeatherEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);

@@ -13,6 +13,9 @@
     <string name="default_value_units">celcius</string>
     <string name="key_units">units</string>
     <string name="settings_map">show location on map</string>
+    <string name="pref_units_metric">C</string>
+    <string name="pref_units_imperial">F</string>
+    <string name="content_authority">com.example.krishnateja.sunshine</string>
     <string-array name="units_names"
         >
         <item name="name_celcius">celcius</item>
